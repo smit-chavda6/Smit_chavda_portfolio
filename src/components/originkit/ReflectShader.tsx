@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import MobileSquareGridCanvas from "./mobile/MobileSquareGridCanvas"
 
 const VERT = `
 attribute vec2 aPosition;
@@ -165,11 +166,14 @@ export default function ReflectShader(props: ReflectShaderProps) {
     const [isMobile, setIsMobile] = React.useState(false);
 
     React.useEffect(() => {
-        if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            setIsMobile(true);
-            return;
-        }
+        const check = () => setIsMobile(window.innerWidth < 768);
+        check();
+        window.addEventListener("resize", check, { passive: true });
+        return () => window.removeEventListener("resize", check);
+    }, []);
 
+    React.useEffect(() => {
+        if (isMobile) return;
         const canvas = canvasRef.current
         if (!canvas) return
 
@@ -222,7 +226,9 @@ export default function ReflectShader(props: ReflectShaderProps) {
         const resize = () => {
             const parent = canvas.parentElement
             if (!parent) return
-            const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+            // Adaptive DPR: cap at 1.5 on screens <1440px to reduce pixel fill rate
+            const rawDpr = window.devicePixelRatio || 1
+            const dpr = Math.min(rawDpr, window.innerWidth >= 1440 ? MAX_DPR : 1.5)
             const w = Math.max(1, Math.round((parent.clientWidth || 1) * dpr))
             const h = Math.max(1, Math.round((parent.clientHeight || 1) * dpr))
             if (canvas.width !== w || canvas.height !== h) {
@@ -286,18 +292,7 @@ export default function ReflectShader(props: ReflectShaderProps) {
     }, [])
 
     if (isMobile) {
-        return (
-            <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden bg-[#020202]">
-                <div className="absolute top-1/2 left-1/2 w-[150vw] h-[150vw] -translate-x-1/2 -translate-y-1/2 animate-[spin_20s_linear_infinite]">
-                    <div className="absolute top-10 left-10 w-[60vw] h-[60vw] bg-indigo-600/30 blur-[80px] rounded-full" />
-                </div>
-                <div className="absolute top-1/2 left-1/2 w-[120vw] h-[120vw] -translate-x-1/2 -translate-y-1/2 animate-[spin_15s_linear_infinite_reverse]">
-                    <div className="absolute bottom-10 right-10 w-[70vw] h-[70vw] bg-purple-600/20 blur-[90px] rounded-full" />
-                </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-blue-500/10 blur-[100px] rounded-full animate-pulse" />
-                <div className="absolute inset-0 opacity-20 mix-blend-screen" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-            </div>
-        );
+        return <MobileSquareGridCanvas accent="#6366f1" secondary="#c084fc" gridSize={36} />;
     }
 
     return (

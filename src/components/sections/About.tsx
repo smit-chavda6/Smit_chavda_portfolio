@@ -30,7 +30,7 @@ export default function About() {
       <div className="relative z-10 w-full max-w-6xl mx-auto px-6 lg:px-12 pointer-events-none">
         
         {/* Glassmorphism Card Wrapper */}
-        <div className="bg-[#050505]/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-10 md:p-16 shadow-[0_0_80px_rgba(99,102,241,0.15)] flex flex-col lg:flex-row gap-12 lg:gap-20 pointer-events-auto">
+        <div className="bg-[#050505]/60 backdrop-blur-sm md:backdrop-blur-xl border border-white/10 rounded-3xl p-10 md:p-16 shadow-[0_0_80px_rgba(99,102,241,0.15)] flex flex-col lg:flex-row gap-12 lg:gap-20 pointer-events-auto">
           
           {/* Left Text Content */}
           <div className="flex-1">

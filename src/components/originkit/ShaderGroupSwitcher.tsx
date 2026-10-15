@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import MobileSquareGridCanvas from "./mobile/MobileSquareGridCanvas"
 
 const MAX_DPR = 2
 
@@ -150,9 +151,10 @@ export default function ShaderGroupSwitcher({
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            setIsMobile(true);
-        }
+        const check = () => setIsMobile(window.innerWidth < 768);
+        check();
+        window.addEventListener("resize", check, { passive: true });
+        return () => window.removeEventListener("resize", check);
     }, []);
 
     const live = useRef({
@@ -178,6 +180,7 @@ export default function ShaderGroupSwitcher({
     }
 
     useEffect(() => {
+        if (isMobile) return;
         const host = hostRef.current
         const canvas = canvasRef.current
         if (!host || !canvas) return
@@ -230,12 +233,14 @@ export default function ShaderGroupSwitcher({
         let targetPtrY = 0.5
 
         const resize = () => {
-            const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
-            w = Math.max(1, Math.round(host.offsetWidth * dpr))
-            h = Math.max(1, Math.round(host.offsetHeight * dpr))
-            canvas.width = w
-            canvas.height = h
-            gl.viewport(0, 0, w, h)
+            // Use lower DPR on smaller screens to reduce pixel fill rate
+            const rawDpr = window.devicePixelRatio || 1;
+            const dpr = Math.min(rawDpr, window.innerWidth >= 1440 ? 2 : 1.0);
+            w = Math.max(1, Math.round(host.offsetWidth * dpr));
+            h = Math.max(1, Math.round(host.offsetHeight * dpr));
+            canvas.width = w;
+            canvas.height = h;
+            gl.viewport(0, 0, w, h);
         }
         
         const ro = new ResizeObserver(resize)
@@ -259,8 +264,15 @@ export default function ShaderGroupSwitcher({
 
         let raf = 0
         const start = performance.now()
+        // Cap to 30fps — imperceptible for background shader, ~2x less GPU work
+        const FRAME_MS = 1000 / 30;
+        let lastDraw = 0;
 
         const draw = (now: number) => {
+            raf = requestAnimationFrame(draw)
+            if (now - lastDraw < FRAME_MS) return;
+            lastDraw = now;
+
             const L = live.current
             
             ptrX += (targetPtrX - ptrX) * 0.1
@@ -283,7 +295,6 @@ export default function ShaderGroupSwitcher({
             gl.uniform2f(u.ptr, ptrX, ptrY)
 
             gl.drawArrays(gl.TRIANGLES, 0, 3)
-            raf = requestAnimationFrame(draw)
         }
 
         raf = requestAnimationFrame(draw)
@@ -297,12 +308,7 @@ export default function ShaderGroupSwitcher({
     }, [])
 
     if (isMobile) {
-        return (
-            <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-indigo-600/10 blur-[100px] rounded-b-full animate-pulse" />
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[40%] bg-purple-600/10 blur-[80px] rounded-t-full animate-pulse" style={{ animationDelay: '2s' }} />
-            </div>
-        );
+        return <MobileSquareGridCanvas accent="#6366f1" secondary="#c084fc" gridSize={36} />;
     }
 
     return (

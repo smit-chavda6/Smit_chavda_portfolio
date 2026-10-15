@@ -16,27 +16,32 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isScrollingRef = React.useRef(false);
+  // Cache section refs once on mount — was re-querying DOM on every scroll event
+  const sectionRefsCache = React.useRef<Element[]>([]);
+
+  // Populate section refs once after mount
+  React.useEffect(() => {
+    sectionRefsCache.current = links
+      .map(l => document.querySelector(l.href))
+      .filter(Boolean) as Element[];
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-
       if (isScrollingRef.current) return;
-
-      const sections = links.map(l => document.querySelector(l.href));
       let current = "";
-      sections.forEach(section => {
-        if (section) {
-          const sectionTop = section.getBoundingClientRect().top;
-          if (sectionTop <= 250) {
-            current = section.getAttribute("id") || "";
-          }
+      // Use cached refs instead of querying DOM on every scroll
+      sectionRefsCache.current.forEach(section => {
+        const sectionTop = section.getBoundingClientRect().top;
+        if (sectionTop <= 250) {
+          current = section.getAttribute("id") || "";
         }
       });
       setActiveTab(current ? `#${current}` : "");
     };
-
-    window.addEventListener("scroll", handleScroll);
+    // passive:true lets browser optimize scroll on compositor thread
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

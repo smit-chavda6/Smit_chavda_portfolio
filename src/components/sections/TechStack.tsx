@@ -18,8 +18,9 @@ const skills = [
 ];
 
 export default function TechStack() {
-  const row1 = [...skills.slice(0, 6), ...skills.slice(0, 6), ...skills.slice(0, 6), ...skills.slice(0, 6)];
-  const row2 = [...skills.slice(6, 12), ...skills.slice(6, 12), ...skills.slice(6, 12), ...skills.slice(6, 12)];
+  // 2 repetitions are sufficient for seamless infinite marquee — was 4x (48 DOM nodes)
+  const row1 = [...skills.slice(0, 6), ...skills.slice(0, 6)];
+  const row2 = [...skills.slice(6, 12), ...skills.slice(6, 12)];
 
   return (
     <section id="skills" className="relative w-full min-h-screen flex flex-col justify-center py-20 md:py-32 bg-black overflow-hidden">
@@ -41,7 +42,7 @@ export default function TechStack() {
         {/* Row 1: Left */}
         <div className="flex w-max animate-marquee-left gap-8">
           {row1.map((skill, idx) => (
-            <div key={idx} className="flex items-center gap-6 bg-[#0a0a0a]/90 backdrop-blur-md border border-white/10 px-8 py-5 rounded-full hover:bg-white/[0.05] hover:border-[#6366f1]/50 transition-all duration-300">
+            <div key={idx} className="flex items-center gap-6 bg-[#0a0a0a] border border-white/10 px-8 py-5 rounded-full hover:bg-white/[0.05] hover:border-[#6366f1]/50 transition-all duration-300">
               <Backlight blur={8}>
                 <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${skill.icon}`} alt={skill.name} className="w-8 h-8 drop-shadow-md brightness-110" />
               </Backlight>
@@ -53,7 +54,7 @@ export default function TechStack() {
         {/* Row 2: Right */}
         <div className="flex w-max animate-marquee-right gap-8 ml-[-20%]">
           {row2.map((skill, idx) => (
-            <div key={idx} className="flex items-center gap-6 bg-[#0a0a0a]/90 backdrop-blur-md border border-white/10 px-8 py-5 rounded-full hover:bg-white/[0.05] hover:border-[#c084fc]/50 transition-all duration-300">
+            <div key={idx} className="flex items-center gap-6 bg-[#0a0a0a] border border-white/10 px-8 py-5 rounded-full hover:bg-white/[0.05] hover:border-[#c084fc]/50 transition-all duration-300">
               <Backlight blur={8}>
                 <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${skill.icon}`} alt={skill.name} className="w-8 h-8 drop-shadow-md brightness-110" />
               </Backlight>

@@ -6,25 +6,19 @@ import { motion, useScroll, useSpring } from "motion/react";
 export default function ScrollProgress() {
   const { scrollYProgress } = useScroll();
   const pathLength = useSpring(scrollYProgress, { stiffness: 400, damping: 90 });
-  const [percent, setPercent] = useState(0);
+  // Merge both scroll handlers into one — was two separate listeners causing double React re-renders
+  const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
+    // Single handler for both visibility and percent via scrollYProgress motion value
     return scrollYProgress.on("change", (latest) => {
-      setPercent(Math.round(latest * 100));
+      setIsVisible(latest > 0.012); // ~equivalent to window.scrollY > 100
     });
   }, [scrollYProgress]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  // Only show when scrolled down a bit
-  const [isVisible, setIsVisible] = useState(false);
-  useEffect(() => {
-    const checkVisibility = () => setIsVisible(window.scrollY > 100);
-    window.addEventListener("scroll", checkVisibility);
-    return () => window.removeEventListener("scroll", checkVisibility);
-  }, []);
 
   return (
     <motion.button

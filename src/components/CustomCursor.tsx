@@ -30,22 +30,11 @@ export default function CustomCursor() {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
       if (!isVisible) setIsVisible(true);
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
+      // Merge hover detection into mousemove — avoids separate mouseover event
+      // with getComputedStyle() which forces a style recalc per DOM node traversal
       const target = e.target as HTMLElement;
-      // Check if hovering over clickable elements
-      if (
-        window.getComputedStyle(target).cursor === "pointer" ||
-        target.tagName.toLowerCase() === "a" ||
-        target.tagName.toLowerCase() === "button" ||
-        target.closest("a") ||
-        target.closest("button")
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
+      const isHoveringClickable = !!(target.closest("a") || target.closest("button") || target.tagName === "A" || target.tagName === "BUTTON");
+      setIsHovering(isHoveringClickable);
     };
 
     const handleMouseDown = () => setIsClicking(true);
@@ -54,7 +43,6 @@ export default function CustomCursor() {
     const handleMouseEnter = () => setIsVisible(true);
 
     window.addEventListener("mousemove", moveCursor);
-    window.addEventListener("mouseover", handleMouseOver);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
     document.addEventListener("mouseleave", handleMouseLeave);
@@ -62,13 +50,12 @@ export default function CustomCursor() {
 
     return () => {
       window.removeEventListener("mousemove", moveCursor);
-      window.removeEventListener("mouseover", handleMouseOver);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("mouseleave", handleMouseLeave);
       document.removeEventListener("mouseenter", handleMouseEnter);
     };
-  }, [cursorX, cursorY, isVisible]);
+  }, []);
 
   // Hide on server or mobile devices to prevent hydration errors
   if (!mounted || isMobile) return null;

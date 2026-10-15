@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useEffect, useRef } from "react"
+import MobileSquareGridCanvas from "./mobile/MobileSquareGridCanvas"
 
 const MAX_DPR = 2
 
@@ -160,6 +161,15 @@ function __OriginkitBase_PredictiveArc(props: Props) {
     const sizeRef = useRef({ w: 0, h: 0 })
     sizeRef.current = { w: num(width, 0), h: num(height, 0) }
 
+    // Mobile detection
+    const [isMobile, setIsMobile] = React.useState(false)
+    React.useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth < 768)
+        check()
+        window.addEventListener("resize", check, { passive: true })
+        return () => window.removeEventListener("resize", check)
+    }, [])
+
     const vRef = useRef<Record<string, number | string | boolean>>({})
     vRef.current = {
         bg: background,
@@ -176,6 +186,20 @@ function __OriginkitBase_PredictiveArc(props: Props) {
         pointerEnabled: pointer_.enabled !== false,
         pointerRadius: clampN(num(pointer_.radius, 220), 40, 600),
         pointerStrength: clampN(num(pointer_.strength, 60), 0, 100) / 100,
+    }
+
+    // Cache parsed colors alongside vRef — avoids 4 parseColor() calls (regex) inside every rAF frame
+    const colorRef = useRef({
+        bg: parseColor(background, [0.012, 0.012, 0.012]),
+        base: parseColor(baseColor, [0.169, 0.055, 0.369]),
+        accent: parseColor(accentColor, [0.627, 0.314, 1.0]),
+        high: parseColor(highlight, [1, 1, 1]),
+    })
+    colorRef.current = {
+        bg: parseColor(background, [0.012, 0.012, 0.012]),
+        base: parseColor(baseColor, [0.169, 0.055, 0.369]),
+        accent: parseColor(accentColor, [0.627, 0.314, 1.0]),
+        high: parseColor(highlight, [1, 1, 1]),
     }
 
     const pointerStateRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0, active: 0, targetActive: 0 })
@@ -195,6 +219,7 @@ function __OriginkitBase_PredictiveArc(props: Props) {
     }
 
     useEffect(() => {
+        if (isMobile) return
         const canvas = canvasRef.current
         if (!canvas) return
         const gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false })
@@ -233,10 +258,16 @@ function __OriginkitBase_PredictiveArc(props: Props) {
         let raf = 0
         let last = performance.now()
         let clock = 0
+        // Cap to 30fps — background dot shader; imperceptible at higher rates
+        const FRAME_MS = 1000 / 30;
+        let lastRender = 0;
 
         const render = (now: number) => {
+            raf = requestAnimationFrame(render)
+            if (now - lastRender < FRAME_MS) return;
             const dt = Math.min(0.05, (now - last) / 1000)
             last = now
+            lastRender = now
             const v = vRef.current
 
             clock = (clock + dt * 0.9 * (v.speed as number)) % 6283
@@ -278,17 +309,17 @@ function __OriginkitBase_PredictiveArc(props: Props) {
                 u("uMouseStrength"),
                 v.pointerEnabled ? (v.pointerStrength as number) * ps.active : 0
             )
-            const cg = parseColor(v.bg as string, [0.012, 0.012, 0.012])
-            const cb = parseColor(v.base as string, [0.169, 0.055, 0.369])
-            const ca = parseColor(v.accent as string, [0.627, 0.314, 1.0])
-            const chh = parseColor(v.high as string, [1, 1, 1])
+            // Use cached parsed colors — avoids 4 parseColor() regex calls per frame
+            const cg = colorRef.current.bg
+            const cb = colorRef.current.base
+            const ca = colorRef.current.accent
+            const chh = colorRef.current.high
             gl.uniform3f(u("uBg"), cg[0], cg[1], cg[2])
             gl.uniform3f(u("uBase"), cb[0], cb[1], cb[2])
             gl.uniform3f(u("uAccent"), ca[0], ca[1], ca[2])
             gl.uniform3f(u("uHigh"), chh[0], chh[1], chh[2])
 
             gl.drawArrays(gl.TRIANGLES, 0, 3)
-            raf = requestAnimationFrame(render)
         }
 
         raf = requestAnimationFrame(render)
@@ -297,6 +328,33 @@ function __OriginkitBase_PredictiveArc(props: Props) {
             cancelAnimationFrame(raf)
         }
     }, [])
+
+    // Rich CSS-only mobile fallback — component had no mobile check at all before
+    if (isMobile) {
+        return (
+            <div
+                className={className}
+                style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    background,
+                    width: typeof width === "number" && width > 0 ? width : "100%",
+                    height: typeof height === "number" && height > 0 ? height : "100%",
+                    ...style,
+                }}
+            >
+                <div className="mobile-bg-about">
+                    <div className="mobile-bg-about-orb1" />
+                    <div className="mobile-bg-about-orb2" />
+                    <div className="mobile-bg-about-dots" />
+                </div>
+            </div>
+        )
+    }
+
+    if (isMobile) {
+        return <MobileSquareGridCanvas accent="#818cf8" secondary="#a855f7" gridSize={36} />;
+    }
 
     return (
         <div

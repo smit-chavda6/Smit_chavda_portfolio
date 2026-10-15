@@ -1,26 +1,45 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import DottedBackground from "../originkit/DottedBackground";
+import MobileSquareGridCanvas from "../originkit/mobile/MobileSquareGridCanvas";
 
 export default function Experience() {
+  // Check if mobile — DottedBackground has its own check at 768px
+  // but we want a richer mobile bg than its default simple check
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
     <section id="experience" className="relative w-full py-20 md:py-32 bg-[#020202] overflow-hidden">
       
-      {/* Dynamic Background Effects */}
-      <div className="absolute inset-0 z-0 opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_10%,transparent_70%)]">
-        <DottedBackground 
-          frequency={1.5}
-          speed={2}
-          colors={["#4f46e5", "#9333ea", "#000000"]}
-          cellSize={24}
-          paletteBias={0.5}
-          gamma={2}
-          bgColor="#020202"
-        />
-      </div>
-      
-      {/* Background glow behind dots */}
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#6366f1]/10 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#c084fc]/10 rounded-full blur-[120px] pointer-events-none z-0" />
+      {/* Mobile: Dynamic Square Grid Canvas */}
+      {isMobile ? (
+        <MobileSquareGridCanvas accent="#8b5cf6" secondary="#06b6d4" gridSize={36} />
+      ) : (
+        <>
+          {/* Desktop: Dynamic WebGL Dotted Background */}
+          <div className="absolute inset-0 z-0 opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_10%,transparent_70%)]">
+            <DottedBackground 
+              frequency={1.5}
+              speed={2}
+              colors={["#4f46e5", "#9333ea", "#000000"]}
+              cellSize={24}
+              paletteBias={0.5}
+              gamma={2}
+              bgColor="#020202"
+            />
+          </div>
+          {/* Background glow behind dots */}
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#6366f1]/10 rounded-full blur-[120px] pointer-events-none z-0" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#c084fc]/10 rounded-full blur-[120px] pointer-events-none z-0" />
+        </>
+      )}
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         
@@ -34,7 +53,7 @@ export default function Experience() {
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* Experience Card */}
-          <div className="flex-1 group relative bg-[#0a0a0a]/60 backdrop-blur-lg md:backdrop-blur-2xl border border-white/10 rounded-3xl md:rounded-[2rem] p-8 md:p-14 hover:border-[#6366f1]/40 transition-colors duration-500 overflow-hidden flex flex-col">
+          <div className="flex-1 group relative bg-[#0a0a0a]/60 backdrop-blur-sm md:backdrop-blur-2xl border border-white/10 rounded-3xl md:rounded-[2rem] p-8 md:p-14 hover:border-[#6366f1]/40 transition-colors duration-500 overflow-hidden flex flex-col">
             <div className="absolute inset-0 bg-gradient-to-br from-[#6366f1]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             
             <div className="relative z-10 flex-grow">
@@ -63,7 +82,7 @@ export default function Experience() {
           </div>
 
           {/* Education Card */}
-          <div className="flex-1 group relative bg-[#0a0a0a]/60 backdrop-blur-lg md:backdrop-blur-2xl border border-white/10 rounded-3xl md:rounded-[2rem] p-8 md:p-14 hover:border-[#c084fc]/40 transition-colors duration-500 overflow-hidden flex flex-col">
+          <div className="flex-1 group relative bg-[#0a0a0a]/60 backdrop-blur-sm md:backdrop-blur-2xl border border-white/10 rounded-3xl md:rounded-[2rem] p-8 md:p-14 hover:border-[#c084fc]/40 transition-colors duration-500 overflow-hidden flex flex-col">
             <div className="absolute inset-0 bg-gradient-to-bl from-[#c084fc]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             
             <div className="relative z-10 flex-grow flex flex-col">

@@ -1,13 +1,23 @@
 "use client"
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import MobileSquareGridCanvas from "./mobile/MobileSquareGridCanvas";
 
 const CHARS = " .'`^,-_~=+:;!*#%$@";
 
 export default function AsciiWater({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: false });
@@ -28,25 +38,32 @@ export default function AsciiWater({ className = "" }: { className?: string }) {
       ctx.textBaseline = "top";
     };
 
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", resize, { passive: true });
     resize();
 
     let rafId = 0;
     let time = 0;
 
-    const render = () => {
-      time += 0.02;
+    // Cap to 20fps — fillText() is slow; 20fps is imperceptible for background text rain
+    const TARGET_FPS = 20;
+    const FRAME_MS = 1000 / TARGET_FPS;
+    let lastFrame = 0;
+
+    const render = (now: number) => {
+      rafId = requestAnimationFrame(render);
+      if (now - lastFrame < FRAME_MS) return;
+      lastFrame = now;
+      time += 0.05; // Compensate for fewer frames vs original 60fps
 
       // Fill background
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, w, h);
 
-      // Draw ASCII
-      ctx.fillStyle = "#0ea5e9"; // Deep cyan/teal
+      // Draw ASCII — set fillStyle once, vary only globalAlpha per char
+      ctx.fillStyle = "#0ea5e9";
 
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
-          // Complex pseudo-noise function mimicking water ripples
           const nx = x * 0.05;
           const ny = y * 0.05;
           
@@ -54,39 +71,36 @@ export default function AsciiWater({ className = "" }: { className?: string }) {
           const v2 = Math.sin(nx * 1.5 - ny * 1.2 - time * 1.5);
           const v3 = Math.sin(Math.hypot(nx, ny) * 2 - time * 2);
           
-          // Normalize noise roughly to 0..1
           let val = (v1 + v2 + v3 + 3) / 6;
           val = Math.max(0, Math.min(1, val));
-          
-          // Apply a bit of contrast/thresholding to make it look like patches of waves
           val = Math.pow(val, 1.5);
 
           const charIdx = Math.floor(val * (CHARS.length - 1));
-          const char = CHARS[charIdx];
 
-          // Fade out edges slightly
-          const fadeX = Math.min(1, x / 10, (cols - x) / 10);
-          const fadeY = Math.min(1, y / 5, (rows - y) / 5);
-          ctx.globalAlpha = val * fadeX * fadeY;
-
-          // Only draw if there's actually a visible char
+          // Skip low-value chars entirely — reduces fillText calls significantly
           if (charIdx > 2) {
-            ctx.fillText(char, x * cellSize, y * cellSize);
+            const fadeX = Math.min(1, x / 10, (cols - x) / 10);
+            const fadeY = Math.min(1, y / 5, (rows - y) / 5);
+            ctx.globalAlpha = val * fadeX * fadeY;
+            ctx.fillText(CHARS[charIdx], x * cellSize, y * cellSize);
           }
         }
       }
       
       ctx.globalAlpha = 1.0;
-      rafId = requestAnimationFrame(render);
     };
 
-    render();
+    rafId = requestAnimationFrame(render);
 
     return () => {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(rafId);
     };
   }, []);
+
+  if (isMobile) {
+    return <MobileSquareGridCanvas accent="#0ea5e9" secondary="#6366f1" gridSize={36} />;
+  }
 
   return (
     <canvas 
