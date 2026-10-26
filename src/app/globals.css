@@ -259,6 +259,10 @@ html.has-cursor * {
 :root[data-theme="light"] [data-scene] {
   --c: var(--c-light);
 }
+/* Inside a scene, every accent (text-accent, bg-accent…) takes that scene's colour */
+[data-scene] > div {
+  --accent: var(--c);
+}
 
 /* ── Scene glow behind the particle cloud ─────────────── */
 @property --gc {
