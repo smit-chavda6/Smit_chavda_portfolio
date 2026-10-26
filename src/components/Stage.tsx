@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import NeuralScene from "./NeuralScene";
+import dynamic from "next/dynamic";
 import Navbar from "./Navbar";
 import Cursor from "./Cursor";
 import { useActiveScene } from "./useActiveScene";
 import { useTheme } from "./useTheme";
 import { profile, sceneColor, scenes } from "@/lib/data";
+
+// three.js is the bulk of the JS; load it after the page's text is on screen
+const NeuralScene = dynamic(() => import("./NeuralScene"), { ssr: false });
 
 // Fixed 3D field + HUD chrome; the scrolling sections are passed as children
 export default function Stage({ children }: { children: React.ReactNode }) {
@@ -16,11 +19,21 @@ export default function Stage({ children }: { children: React.ReactNode }) {
   const [time, setTime] = useState("");
 
   useEffect(() => {
-    const onScroll = () => {
+    // At most one progress update per frame, and only when it visibly changes
+    let ticking = false;
+    const update = () => {
+      ticking = false;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(max > 0 ? window.scrollY / max : 0);
+      const next = max > 0 ? Math.round((window.scrollY / max) * 200) / 200 : 0;
+      setProgress((prev) => (prev === next ? prev : next));
     };
-    onScroll();
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
 
     const fmt = () =>

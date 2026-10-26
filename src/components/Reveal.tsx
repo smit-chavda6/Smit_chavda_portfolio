@@ -16,7 +16,7 @@ export default function Reveal({
   const reduce = useReducedMotion();
   return (
     <motion.div
-      className={className}
+      className={`reveal ${className ?? ""}`}
       initial={reduce ? false : { opacity: 0, y: 40, filter: "blur(12px)" }}
       whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       viewport={{ amount: 0.4 }}

@@ -95,11 +95,17 @@ export default function NeuralScene({ active, theme, color }: { active: number; 
     const isMobile = window.innerWidth < 768;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const count = isMobile ? 4500 : 10000;
+    // Weak phones start capped at 30 fps; others are downgraded if frames run slow
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const lowPower = isMobile && ((nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4);
 
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance" });
     const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
     renderer.setPixelRatio(pixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    // updateStyle=false: the canvas is stretched by CSS, so small viewport changes need no buffer reallocation
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -182,38 +188,77 @@ export default function NeuralScene({ active, theme, color }: { active: number; 
     let lastScroll = window.scrollY;
     let spin = 0;
 
+    // Mobile address-bar show/hide fires height-only resizes while scrolling; ignore those
+    let lastW = window.innerWidth, lastH = window.innerHeight;
     const onResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      const w = window.innerWidth, h = window.innerHeight;
+      if (isMobile && w === lastW && Math.abs(h - lastH) < 160) return;
+      lastW = w;
+      lastH = h;
+      camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(w, h, false);
     };
     window.addEventListener("resize", onResize);
 
     const accent = new THREE.Color();
     const clock = new THREE.Clock();
     let frame = 0;
+    let frameBudget = lowPower ? 1 / 30 : 0; // seconds per rendered frame; 0 = uncapped
+    let acc = 0;
+    let slowFrames = 0, sampled = 0;
+    let settledShape = "";
 
     const tick = () => {
       frame = requestAnimationFrame(tick);
-      const dt = Math.min(clock.getDelta(), 0.05);
-      const t = clock.elapsedTime;
-      uniforms.uTime.value = t;
+      const raw = clock.getDelta();
+      acc += raw;
+      if (frameBudget && acc < frameBudget) return;
+      const dt = Math.min(acc, 0.05);
+      acc = 0;
+
+      // Adaptive quality: if a phone keeps missing 60 fps, drop to 30 fps at 1× resolution
+      if (isMobile && !frameBudget) {
+        sampled++;
+        if (raw > 0.024) slowFrames++;
+        if (sampled === 90) {
+          if (slowFrames > 30) {
+            frameBudget = 1 / 30;
+            renderer.setPixelRatio(1);
+            renderer.setSize(lastW, lastH, false);
+            uniforms.uPixelRatio.value = 1;
+          }
+          sampled = slowFrames = 0;
+        }
+      }
+
+      uniforms.uTime.value = clock.elapsedTime;
 
       const sceneCfg = scenes[activeRef.current];
       const target = shapes[sceneCfg.shape];
 
-      if (reduce) {
-        positions.set(target);
-      } else {
-        for (let i = 0; i < count; i++) {
-          const k = 1 - Math.exp(-dt * speed[i]);
-          const j = i * 3;
-          positions[j] += (target[j] - positions[j]) * k;
-          positions[j + 1] += (target[j + 1] - positions[j + 1]) * k;
-          positions[j + 2] += (target[j + 2] - positions[j + 2]) * k;
+      // Morph toward the target; once every point has arrived, stop touching the buffer
+      // (the gentle wobble runs on the GPU via uTime, so the shape still breathes)
+      if (settledShape !== sceneCfg.shape) {
+        if (reduce) {
+          positions.set(target);
+          settledShape = sceneCfg.shape;
+        } else {
+          let maxDelta = 0;
+          for (let i = 0; i < count; i++) {
+            const k = 1 - Math.exp(-dt * speed[i]);
+            const j = i * 3;
+            const dx = target[j] - positions[j], dy = target[j + 1] - positions[j + 1], dz = target[j + 2] - positions[j + 2];
+            positions[j] += dx * k;
+            positions[j + 1] += dy * k;
+            positions[j + 2] += dz * k;
+            const d = Math.abs(dx) + Math.abs(dy) + Math.abs(dz);
+            if (d > maxDelta) maxDelta = d;
+          }
+          if (maxDelta < 0.003) settledShape = sceneCfg.shape;
         }
+        posAttr.needsUpdate = true;
       }
-      posAttr.needsUpdate = true;
 
       // Accent comes from Stage (current scene colour for the active theme)
       accent.set(colorRef.current);

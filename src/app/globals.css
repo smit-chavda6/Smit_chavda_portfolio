@@ -313,3 +313,28 @@ html.has-cursor * {
   -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent);
   mask-image: linear-gradient(to bottom, black 55%, transparent);
 }
+
+/* ── Phones & touch devices: drop the GPU-heavy effects ───────────────
+   Backdrop blur over a constantly animating WebGL canvas must be recomputed every
+   frame, and animated blur filters are costly too. The glass surfaces already have
+   semi-opaque backgrounds, so they read the same without the blur. */
+@media (max-width: 767px), (hover: none) and (pointer: coarse) {
+  *,
+  *::before,
+  *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  /* Reveal animations: fade + rise only (overrides motion's inline blur) */
+  .reveal {
+    filter: none !important;
+  }
+  /* Glass surfaces get a touch more opacity to compensate for the missing blur */
+  .bg-glass\/70,
+  .bg-glass\/75 {
+    background-color: color-mix(in srgb, var(--glass) 90%, transparent);
+  }
+  .nav-fade {
+    background: linear-gradient(to bottom, var(--ink) 0%, color-mix(in srgb, var(--ink) 92%, transparent) 55%, transparent 100%);
+  }
+}
