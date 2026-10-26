@@ -29,81 +29,138 @@ export const scenes: Scene[] = [
   { id: "about", label: "About", shape: "knot", side: "left", color: "#9a86ff", colorLight: "#5a43d1" },
   { id: "infermesh", label: "Project / InferMesh", shape: "mesh", side: "left", color: "#ffb21f", colorLight: "#c27c00" },
   { id: "contextos", label: "Project / ContextOS", shape: "layers", side: "right", color: "#5bd1ff", colorLight: "#0a86bd" },
-  { id: "manprotech", label: "Project / ManProTech", shape: "lattice", side: "left", color: "#b9ff5b", colorLight: "#4b870d" },
+  { id: "salon", label: "Project / MJ Salon", shape: "lattice", side: "left", color: "#b9ff5b", colorLight: "#4b870d" },
   { id: "homedecor", label: "Project / Home Decor", shape: "wave", side: "right", color: "#ff7ad9", colorLight: "#c0328f" },
   { id: "stack", label: "Stack", shape: "helix", side: "left", color: "#9a86ff", colorLight: "#5a43d1" },
   { id: "journey", label: "Journey", shape: "galaxy", side: "right", color: "#ffb21f", colorLight: "#c27c00" },
   { id: "contact", label: "Contact", shape: "portal", side: "center", color: "#9a86ff", colorLight: "#5a43d1" },
 ];
 
-export const projects = [
+export type ProjectLink = { label: "Live" | "GitHub"; href: string };
+
+export const projects: {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  highlights: string[];
+  tech: string[];
+  links: ProjectLink[];
+}[] = [
   {
     id: "infermesh",
     title: "InferMesh",
-    category: "LLM Gateway",
-    year: "2026",
+    category: "LLM Gateway & Observability",
     description:
-      "Multi-provider LLM gateway unifying OpenAI, Anthropic and Gemini behind one API, with pgvector semantic caching and a React 19 observability dashboard.",
-    tech: ["FastAPI", "React 19", "PostgreSQL", "pgvector", "Redis", "Docker"],
-    link: "https://github.com/smit-chavda6",
+      "Production-shaped gateway unifying OpenAI, Anthropic, Gemini and Azure AI Foundry behind one OpenAI-compatible API — with retry/backoff, cross-provider fallback and circuit breaking, two-tier exact + pgvector semantic caching, Redis rate limiting and a 15-page React 19 observability dashboard.",
+    highlights: ["248+ automated tests", "4 LLM providers", "15-page dashboard"],
+    tech: ["Python 3.13", "FastAPI", "PostgreSQL", "pgvector", "Redis", "React 19", "TypeScript", "Docker", "GitHub Actions"],
+    links: [{ label: "GitHub", href: "https://github.com/smit-chavda6/InferMesh" }],
   },
   {
     id: "contextos",
     title: "ContextOS",
-    category: "Browser Extension",
-    year: "2026",
+    category: "AI Browser Extension",
     description:
-      "AI context-persistence extension bridging session state across ChatGPT, Claude and DeepSeek with client-side, in-browser vector search.",
-    tech: ["React", "Vite", "Chrome MV3", "Vector Search"],
-    link: "https://github.com/smit-chavda6",
+      "Context-persistence extension that carries session state across ChatGPT, Claude, Gemini and DeepSeek — with client-side vector search using in-browser cosine similarity and a credentials engine for multiple LLM APIs, stored strictly on the client for privacy.",
+    highlights: ["4 AI platforms bridged", "8+ LLM APIs", "No external database"],
+    tech: ["React", "Vite", "Tailwind CSS", "Framer Motion", "Chrome MV3", "Vector Search"],
+    links: [
+      { label: "Live", href: "https://context-os-extension.vercel.app/" },
+      { label: "GitHub", href: "https://github.com/smit-chavda6/ContextOS-extension" },
+    ],
   },
   {
-    id: "manprotech",
-    title: "ManProTech",
-    category: "Full-Stack CMS",
-    year: "2025",
+    id: "salon",
+    title: "MJ Family Salon",
+    category: "Salon Website + Booking CMS",
     description:
-      "Production React SPA on a custom PHP/MySQL backend with a full admin CMS, custom auth and server-side injected SEO tags.",
-    tech: ["React 18", "PHP 8", "MySQL", "Tailwind"],
-    link: "https://github.com/smit-chavda6",
+      "Live salon website with online appointment booking and email notifications, plus an admin CMS for bookings, services, gallery, team, reviews and hours — drag-to-reorder content, auto-resized image uploads, secure login and SEO settings, deployed on a custom domain over HTTPS.",
+    highlights: ["Live in production", "Online booking", "Full admin CMS"],
+    tech: ["PHP 8.1", "MySQL", "JavaScript", "Bootstrap 5", "GSAP", "cPanel"],
+    links: [{ label: "Live", href: "https://mjthefamilysalon.shop/" }],
   },
   {
     id: "homedecor",
     title: "Home Decor",
     category: "E-Commerce + AI",
-    year: "2025",
     description:
-      "Full-stack furniture store with a Gemini-powered shopping assistant, response caching and automated n8n order workflows.",
-    tech: ["Node.js", "MongoDB", "Gemini API", "n8n"],
-    link: "https://github.com/smit-chavda6",
+      "Full-stack furniture store with authentication, an admin dashboard and REST APIs, a Gemini-powered chatbot with intelligent product search and caching, and invoices and order workflows automated through n8n webhooks.",
+    highlights: ["25+ REST APIs", "85% fewer AI API calls", "n8n automation"],
+    tech: ["Node.js", "Express", "MongoDB", "Gemini API", "n8n"],
+    links: [{ label: "GitHub", href: "https://github.com/smit-chavda6/HOME-DECOUR-FURNITURE" }],
   },
 ];
 
-// Icons live in /public/icons (devicon, MIT); `brand` tints the icon on hover
-export const skills = [
-  { name: "Python", icon: "python", brand: "#ffd845" },
-  { name: "TypeScript", icon: "typescript", brand: "#3178c6" },
-  { name: "Java", icon: "java", brand: "#ea2d2e" },
-  { name: "C++", icon: "cplusplus", brand: "#659ad2" },
-  { name: "React", icon: "react", brand: "#61dafb" },
-  { name: "Node.js", icon: "nodejs", brand: "#5fa04e" },
-  { name: "FastAPI", icon: "fastapi", brand: "#049688" },
-  { name: "MongoDB", icon: "mongodb", brand: "#4faa41" },
-  { name: "MySQL", icon: "mysql", brand: "#00a3e0" },
-  { name: "Docker", icon: "docker", brand: "#1d91e6" },
-  { name: "Azure", icon: "azure", brand: "#0089d6" },
-  { name: "Git", icon: "git", brand: "#f34f29" },
+// Grouped as on the résumé. Brand icons are devicon (MIT) in /public/icons;
+// non-brand skills use simple generic glyphs. `brand` tints the icon on hover.
+export const skillGroups = [
+  {
+    group: "Languages",
+    items: [
+      { name: "Python", icon: "python", brand: "#ffd845" },
+      { name: "Java", icon: "java", brand: "#ea2d2e" },
+      { name: "TypeScript", icon: "typescript", brand: "#3178c6" },
+      { name: "C", icon: "c", brand: "#659ad2" },
+      { name: "C++", icon: "cplusplus", brand: "#659ad2" },
+    ],
+  },
+  {
+    group: "Web",
+    items: [
+      { name: "HTML5", icon: "html5", brand: "#e44d26" },
+      { name: "CSS3", icon: "css3", brand: "#2965f1" },
+      { name: "JavaScript", icon: "javascript", brand: "#f0db4f" },
+      { name: "React", icon: "react", brand: "#61dafb" },
+      { name: "FastAPI", icon: "fastapi", brand: "#049688" },
+      { name: "Node.js", icon: "nodejs", brand: "#5fa04e" },
+      { name: "Express.js", icon: "express", brand: "var(--paper)" },
+    ],
+  },
+  {
+    group: "Databases",
+    items: [
+      { name: "MySQL", icon: "mysql", brand: "#00a3e0" },
+      { name: "MongoDB", icon: "mongodb", brand: "#4faa41" },
+      { name: "SQLite", icon: "sqlite", brand: "#3a9ad9" },
+    ],
+  },
+  {
+    group: "Data Science",
+    items: [
+      { name: "Data Analysis", icon: "data-analysis", brand: "#f59e0b" },
+      { name: "Data Visualization", icon: "data-viz", brand: "#22d3ee" },
+      { name: "Machine Learning", icon: "ml", brand: "#a78bfa" },
+      { name: "LLM Fine-tuning", icon: "fine-tuning", brand: "#f472b6" },
+    ],
+  },
+  {
+    group: "Android",
+    items: [{ name: "Android Studio", icon: "androidstudio", brand: "#3ddc84" }],
+  },
+  {
+    group: "DevOps & Cloud",
+    items: [
+      { name: "Git", icon: "git", brand: "#f34f29" },
+      { name: "GitHub", icon: "github", brand: "var(--paper)" },
+      { name: "Docker", icon: "docker", brand: "#1d91e6" },
+      { name: "Azure", icon: "azure", brand: "#0089d6" },
+      { name: "n8n", icon: "workflow", brand: "#ea4b71" },
+    ],
+  },
 ];
 
 export const journey = [
   {
-    period: "Mar — Jul 2026",
+    period: "Mar — Aug 2026 · 6 mos",
     title: "AI Engineer Intern",
-    org: "Dehix",
+    org: "Dehix · Remote",
     points: [
-      "Designed and deployed generative-AI features, integrated end to end across the full-stack product.",
-      "Built data pipelines for collection, preprocessing and model-training optimisation.",
-      "Worked closely with backend and frontend teams to ship scalable AI functionality.",
+      "Supported development of AI and machine-learning solutions as a remote intern on the Dehix engineering team.",
+      "Collected, cleaned and preprocessed datasets, then trained models for AI-driven product features.",
+      "Built LLM-powered features and connected them to backend APIs and frontend interfaces alongside the web team.",
+      "Evaluated and tuned model outputs to improve accuracy and performance.",
+      "Researched emerging AI tools and techniques and applied the relevant ones to ongoing work.",
     ],
   },
   {

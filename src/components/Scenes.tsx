@@ -1,7 +1,7 @@
 import React from "react";
 import Reveal from "./Reveal";
 import CopyEmail from "./CopyEmail";
-import { journey, profile, projects, scenes, skills } from "@/lib/data";
+import { journey, profile, projects, scenes, skillGroups } from "@/lib/data";
 
 function Scene({
   id,
@@ -123,35 +123,51 @@ export default function Scenes() {
           <Scene key={p.id} id={p.id}>
             <Reveal>
               <Kicker index={String(i + 3).padStart(2, "0")}>
-                Project {String(i + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")} · {p.category} · {p.year}
+                Project {String(i + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")} · {p.category}
               </Kicker>
             </Reveal>
             <Reveal delay={0.1}>
-              {/* Sized to the text column so long names (CONTEXTOS, MANPROTECH) never overflow */}
+              {/* Sized to the text column so long names (CONTEXTOS, MJ FAMILY SALON) never overflow */}
               <h2 className="display mt-6 text-[min(10.5cqw,6rem)] [overflow-wrap:anywhere]">{p.title}</h2>
             </Reveal>
             <Reveal delay={0.2}>
               <p className="mt-6 leading-relaxed text-paper/70 md:text-lg">{p.description}</p>
             </Reveal>
             <Reveal delay={0.3}>
-              <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.15em] text-muted">
+              {/* Key numbers from the résumé */}
+              <ul className="mt-8 flex flex-wrap gap-2">
+                {p.highlights.map((h) => (
+                  <li
+                    key={h}
+                    className="border border-[var(--c)]/40 bg-[var(--c)]/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--c)]"
+                  >
+                    {h}
+                  </li>
+                ))}
+              </ul>
+              <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.15em] text-muted">
                 {p.tech.map((t) => (
                   <li key={t}>/ {t}</li>
                 ))}
               </ul>
-              <a
-                href={p.link}
-                target="_blank"
-                data-cursor="Source"
-                rel="noreferrer"
-                className="group mt-10 inline-flex items-center gap-4 font-mono text-xs uppercase tracking-[0.2em]"
-              >
-                <span className="relative grid h-12 w-12 place-items-center rounded-full border border-paper/30 transition-all duration-300 group-hover:scale-110 group-hover:border-transparent group-hover:text-ink">
-                  <span className="absolute h-12 w-12 scale-0 rounded-full bg-[var(--c)] transition-transform duration-300 group-hover:scale-100" />
-                  <span className="relative">↗</span>
-                </span>
-                View source
-              </a>
+              <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4">
+                {p.links.map((l) => (
+                  <a
+                    key={l.label}
+                    href={l.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    data-cursor={l.label === "Live" ? "Visit" : "Source"}
+                    className="group inline-flex items-center gap-4 font-mono text-xs uppercase tracking-[0.2em]"
+                  >
+                    <span className="relative grid h-12 w-12 place-items-center rounded-full border border-paper/30 transition-all duration-300 group-hover:scale-110 group-hover:border-transparent group-hover:text-ink">
+                      <span className="absolute h-12 w-12 scale-0 rounded-full bg-[var(--c)] transition-transform duration-300 group-hover:scale-100" />
+                      <span className="relative">↗</span>
+                    </span>
+                    {l.label === "Live" ? "Live site" : "GitHub"}
+                  </a>
+                ))}
+              </div>
             </Reveal>
           </Scene>
         );
@@ -167,29 +183,37 @@ export default function Scenes() {
             <span className="thin">Tech</span> <span className="text-accent">stack.</span>
           </h2>
         </Reveal>
-        <Reveal delay={0.2}>
-          <ul className="mt-10 grid grid-cols-3 gap-px overflow-hidden border border-paper/15 bg-paper/15 sm:grid-cols-4">
-            {skills.map((s, i) => (
-              <li
-                key={s.name}
-                data-cursor={s.name}
-                className="skill group relative flex aspect-square flex-col justify-between bg-ink/85 p-3 backdrop-blur-sm transition-colors duration-300 hover:bg-ink/60 md:p-4"
-                style={{ ["--brand" as string]: s.brand }}
-              >
-                <span className="font-mono text-[9px] tracking-[0.15em] text-muted">{String(i + 1).padStart(2, "0")}</span>
-                <span
-                  aria-hidden
-                  className="skill-icon mx-auto h-9 w-9 md:h-11 md:w-11"
-                  style={{ ["--icon" as string]: `url(/icons/${s.icon}.svg)` }}
-                />
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-paper/80 transition-colors group-hover:text-paper md:text-[11px]">
-                  {s.name}
-                </span>
-                <span className="corner pointer-events-none absolute inset-1.5" />
-              </li>
-            ))}
-          </ul>
-        </Reveal>
+        <div className="mt-10 space-y-5">
+          {skillGroups.map((g, gi) => (
+            <Reveal key={g.group} delay={0.15 + gi * 0.05}>
+              <div className="grid gap-3 border-t border-paper/15 pt-4 sm:grid-cols-[120px_1fr] sm:gap-4">
+                <p className="pt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
+                  <span className="text-accent">{String(gi + 1).padStart(2, "0")}</span> {g.group}
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {g.items.map((s) => (
+                    <li
+                      key={s.name}
+                      data-cursor={s.name}
+                      className="skill group relative flex items-center gap-2.5 border border-paper/15 bg-ink/70 px-3 py-2 backdrop-blur-sm transition-colors duration-300 hover:border-paper/30"
+                      style={{ ["--brand" as string]: s.brand }}
+                    >
+                      <span
+                        aria-hidden
+                        className="skill-icon h-[18px] w-[18px] shrink-0"
+                        style={{ ["--icon" as string]: `url(/icons/${s.icon}.svg)` }}
+                      />
+                      <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-paper/80 transition-colors group-hover:text-paper">
+                        {s.name}
+                      </span>
+                      <span className="corner pointer-events-none absolute -inset-1" />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          ))}
+        </div>
       </Scene>
 
       {/* 08 — Journey */}
