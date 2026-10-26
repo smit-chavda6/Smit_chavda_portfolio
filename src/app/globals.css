@@ -1,376 +1,311 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --font-sans: 'Outfit', sans-serif;
-  --indigo: #6366f1;
-  --purple: #c084fc;
+  --ink: #050507;
+  --paper: #e9e4dc;
+  --muted: #7c7a76;
+  --accent: #9a86ff;
+  --glass: #0b0b0f;
+  --glow: #0d0c12;
+  --shadow: rgba(0, 0, 0, 0.9);
+  --sheen: rgba(255, 255, 255, 0.06);
+  --vignette: rgba(0, 0, 0, 0.65);
+  --scanline: rgba(255, 255, 255, 0.018);
+  color-scheme: dark;
 }
 
-/* Tailwind CSS v4 Theme configuration */
+/* Light: warm paper, ink-dark particles, deeper accents */
+:root[data-theme="light"] {
+  --ink: #f1ede6;
+  --paper: #14132b;
+  --muted: #6b6878;
+  --accent: #5a43d1;
+  --glass: #fbf9f5;
+  --glow: #fbf8f3;
+  --shadow: rgba(60, 45, 25, 0.25);
+  --sheen: rgba(255, 255, 255, 0.8);
+  --vignette: rgba(150, 120, 90, 0.16);
+  --scanline: transparent;
+  color-scheme: light;
+}
+
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-glass: var(--glass);
+  --font-sans: var(--font-manrope);
+  --font-mono: var(--font-jetbrains);
+  --font-display: var(--font-unbounded);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, var(--glow) 0%, var(--ink) 70%) fixed,
+    var(--ink);
+  color: var(--paper);
   overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #000;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
+::selection {
+  background: var(--accent);
+  color: var(--ink);
 }
 
-/* ─── Text animations ─────────────────────────────── */
-@keyframes shimmer {
-  100% { transform: translateX(100%); }
+/* Massive tight display type used for scene titles */
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  body, a, button, input, textarea, select {
-    cursor: none !important;
+/* Lighter second line inside display titles */
+.display .thin {
+  font-weight: 300;
+}
+
+body {
+  font-feature-settings: "ss01", "cv11";
+  letter-spacing: -0.005em;
+}
+
+/* Mono HUD labels read better slightly smaller and wider */
+.font-mono {
+  font-feature-settings: "zero", "calt" 0;
+}
+
+/* Vignette + scanline film over the 3D field */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 5; /* above the canvas (z-0), below content (z-10) */
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, var(--vignette) 100%),
+    repeating-linear-gradient(0deg, var(--scanline) 0 1px, transparent 1px 3px);
+}
+
+/* Skill tiles: monochrome icon via mask, brand colour + glow on hover */
+.skill-icon {
+  background: var(--paper);
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+  opacity: 0.85;
+  transition: background 0.35s, opacity 0.35s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s;
+}
+.skill:hover .skill-icon {
+  background: var(--brand);
+  opacity: 1;
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 14px var(--brand));
+}
+
+/* HUD corner brackets that snap in on hover */
+.corner {
+  --c: var(--brand, var(--accent));
+  background:
+    linear-gradient(var(--c), var(--c)) top left / 10px 1px,
+    linear-gradient(var(--c), var(--c)) top left / 1px 10px,
+    linear-gradient(var(--c), var(--c)) bottom right / 10px 1px,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px 10px;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: scale(1.08);
+  transition: opacity 0.3s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.group:hover > .corner {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Custom cursor (see Cursor.tsx) ─────────────────── */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
+.cursor {
+  --bracket: 7px;
+}
+.cursor-frame {
+  will-change: transform, width, height;
+  transition: background-color 0.3s;
+}
+.cursor-frame > span {
+  position: absolute;
+  width: var(--bracket);
+  height: var(--bracket);
+  border-color: var(--paper);
+  transition: border-color 0.3s, width 0.3s, height 0.3s;
+}
+.cursor-frame .tl { top: 0; left: 0; border-top: 1.5px solid; border-left: 1.5px solid; }
+.cursor-frame .tr { top: 0; right: 0; border-top: 1.5px solid; border-right: 1.5px solid; }
+.cursor-frame .bl { bottom: 0; left: 0; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+.cursor-frame .br { bottom: 0; right: 0; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+
+/* Idle: slow breathing reticle */
+.cursor[data-mode="idle"] .cursor-frame {
+  animation: reticle 2.4s ease-in-out infinite;
+}
+@keyframes reticle {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.45; }
+}
+
+/* Locked on to a link / card */
+.cursor[data-mode="target"] {
+  --bracket: 12px;
+}
+.cursor[data-mode="target"] .cursor-frame {
+  background: color-mix(in srgb, var(--cursor) 7%, transparent);
+}
+.cursor[data-mode="target"] .cursor-frame > span {
+  border-color: var(--cursor);
+}
+.cursor[data-down="on"] .cursor-frame > span {
+  border-color: var(--cursor);
+}
+
+.cursor-dot {
+  background: var(--cursor);
+  box-shadow: 0 0 10px var(--cursor);
+  transition: background 0.6s;
+}
+
+.cursor-label {
+  padding: 4px 8px;
+  background: var(--cursor);
+  color: var(--ink);
+  opacity: 0;
+  scale: 0.6;
+  transform-origin: top left;
+  transition: opacity 0.2s, scale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.cursor[data-label="on"] .cursor-label {
+  opacity: 1;
+  scale: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor[data-mode="idle"] .cursor-frame { animation: none; }
+}
+
+/* ── Navbar dot-matrix mark ─────────────────────────── */
+.matrix-cell {
+  background: color-mix(in srgb, var(--paper) 18%, transparent);
+  animation: matrix 2.8s ease-in-out infinite;
+}
+@keyframes matrix {
+  0%, 100% { background: color-mix(in srgb, var(--paper) 18%, transparent); box-shadow: none; }
+  45%, 55% { background: var(--mark); box-shadow: 0 0 6px var(--mark); }
+}
+.mark:hover .matrix-cell {
+  animation-duration: 0.9s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .matrix-cell { animation: none; }
+  .matrix-cell.on { background: var(--mark); }
+}
+
+@keyframes signal {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+@keyframes hud-fade {
+  from { opacity: 0; transform: translateY(6px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.hud-fade {
+  animation: hud-fade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Keep text readable over the particles on small screens */
+@media (max-width: 1023px) {
+  [data-scene] > div {
+    text-shadow: 0 2px 24px color-mix(in srgb, var(--ink) 90%, transparent);
   }
 }
 
-@keyframes text-sweep {
-  0%   { background-position: 0% center; }
-  100% { background-position: -200% center; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hud-fade { animation: none; }
 }
 
-.animate-text-sweep {
-  background-size: 200% auto;
-  animation: text-sweep 4s linear infinite;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* Theme switch: circular reveal driven from useTheme() */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 9999;
 }
 
-/* ─── Marquee ─────────────────────────────────────── */
-@keyframes marquee-left {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* Per-scene accent for server-rendered sections (see Scenes.tsx) */
+[data-scene] {
+  --c: var(--c-dark);
+}
+:root[data-theme="light"] [data-scene] {
+  --c: var(--c-light);
 }
 
-@keyframes marquee-right {
-  0%   { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
+/* ── Scene glow behind the particle cloud ─────────────── */
+@property --gc {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #9a86ff;
 }
-
-.animate-marquee-left  { animation: marquee-left  40s linear infinite; }
-.animate-marquee-right { animation: marquee-right 40s linear infinite; }
-
-/* ═══════════════════════════════════════════════════
-   MOBILE BACKGROUND SYSTEM
-   All animations: transform + opacity ONLY
-   (GPU-composited, zero layout cost on mobile)
-   ═══════════════════════════════════════════════════ */
-
-/* ─── Shared orb drift animations ────────────────── */
-@keyframes orb-drift-a {
-  0%,100% { transform: translate(0px,  0px) scale(1);   }
-  33%      { transform: translate(20px,-18px) scale(1.06); }
-  66%      { transform: translate(-14px, 22px) scale(0.96); }
-}
-@keyframes orb-drift-b {
-  0%,100% { transform: translate(0px, 0px) scale(1);   }
-  40%      { transform: translate(-22px, 16px) scale(1.08); }
-  70%      { transform: translate(18px,-12px) scale(0.94); }
-}
-@keyframes orb-drift-c {
-  0%,100% { transform: translate(0px, 0px) scale(1);   }
-  50%      { transform: translate(16px, 20px) scale(1.1); }
-}
-@keyframes orb-pulse-opacity {
-  0%,100% { opacity: 0.55; }
-  50%      { opacity: 0.85; }
-}
-
-/* ─── Grid shimmer for grid overlays ─────────────── */
-@keyframes grid-fade {
-  0%,100% { opacity: 0.03; }
-  50%      { opacity: 0.07; }
-}
-
-/* ─── Hero section mobile bg ─────────────────────── */
-.mobile-bg-hero {
-  position: absolute;
-  inset: 0;
-  background: #000;
-  overflow: hidden;
+.scene-glow {
+  --gx: 50%;
+  position: fixed;
+  top: 50%;
+  left: var(--gx);
+  z-index: 0;
+  width: min(70vmax, 1100px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
   pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--gc) var(--gs, 12%), transparent) 0%, transparent 62%);
+  transition: --gc 1.2s ease, left 1.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.mobile-bg-hero::before {
-  /* Indigo aurora top */
-  content: '';
-  position: absolute;
-  top: -20%;
-  left: 50%;
-  width: 100vw;
-  height: 80vw;
-  background: radial-gradient(ellipse at center, rgba(99,102,241,0.35) 0%, transparent 70%);
-  transform: translateX(-50%);
-  animation: orb-drift-a 12s ease-in-out infinite;
-  will-change: transform;
+@media (min-width: 1024px) {
+  .scene-glow[data-side="left"] { --gx: 70%; }
+  .scene-glow[data-side="right"] { --gx: 30%; }
 }
-.mobile-bg-hero::after {
-  /* Purple aurora bottom-right */
-  content: '';
-  position: absolute;
-  bottom: 5%;
-  right: -10%;
-  width: 80vw;
-  height: 80vw;
-  background: radial-gradient(ellipse at center, rgba(192,132,252,0.25) 0%, transparent 65%);
-  animation: orb-drift-b 15s ease-in-out infinite;
-  will-change: transform;
-}
-.mobile-bg-hero-orb {
-  position: absolute;
-  bottom: 30%;
-  left: -5%;
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(ellipse at center, rgba(79,70,229,0.2) 0%, transparent 70%);
-  animation: orb-drift-c 18s ease-in-out infinite, orb-pulse-opacity 8s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-/* Subtle mesh grid overlay for Hero */
-.mobile-bg-hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: grid-fade 6s ease-in-out infinite;
+:root[data-theme="light"] .scene-glow {
+  --gs: 26%;
+  filter: saturate(1.3);
 }
 
-/* ─── About section mobile bg ────────────────────── */
-.mobile-bg-about {
-  position: absolute;
+/* Light mode: faint printed dot grid on the paper */
+:root[data-theme="light"] body::before {
+  content: "";
+  position: fixed;
   inset: 0;
-  background: #050505;
-  overflow: hidden;
+  z-index: 0;
   pointer-events: none;
-}
-.mobile-bg-about-orb1 {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  width: 110vw;
-  height: 70vw;
-  background: radial-gradient(ellipse at 40% 50%, rgba(49,16,94,0.6) 0%, rgba(99,102,241,0.2) 40%, transparent 70%);
-  transform: translateX(-50%);
-  animation: orb-drift-a 14s ease-in-out infinite;
-  will-change: transform;
-}
-.mobile-bg-about-orb2 {
-  position: absolute;
-  bottom: 5%;
-  right: -20%;
-  width: 80vw;
-  height: 80vw;
-  background: radial-gradient(ellipse at center, rgba(99,102,241,0.18) 0%, transparent 65%);
-  animation: orb-drift-b 18s ease-in-out infinite;
-  will-change: transform;
-}
-/* Dot grid for About */
-.mobile-bg-about-dots {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(99,102,241,0.25) 1px, transparent 1px);
-  background-size: 28px 28px;
-  animation: grid-fade 7s ease-in-out infinite;
-  mask-image: radial-gradient(ellipse at 50% 40%, black 30%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 30%, transparent 75%);
+  background-image: radial-gradient(color-mix(in srgb, var(--paper) 14%, transparent) 1px, transparent 1.3px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, black 20%, transparent 85%);
 }
 
-/* ─── TechStack section mobile bg ────────────────── */
-.mobile-bg-techstack {
-  position: absolute;
-  inset: 0;
-  background: #000;
-  overflow: hidden;
-  pointer-events: none;
-}
-.mobile-bg-techstack-orb1 {
-  position: absolute;
-  top: 5%;
-  left: -10%;
-  width: 90vw;
-  height: 90vw;
-  background: radial-gradient(ellipse at center, rgba(99,102,241,0.22) 0%, transparent 65%);
-  animation: orb-drift-a 16s ease-in-out infinite, orb-pulse-opacity 9s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-.mobile-bg-techstack-orb2 {
-  position: absolute;
-  bottom: 0%;
-  right: -10%;
-  width: 80vw;
-  height: 80vw;
-  background: radial-gradient(ellipse at center, rgba(192,132,252,0.18) 0%, transparent 65%);
-  animation: orb-drift-b 20s ease-in-out infinite;
-  will-change: transform;
-}
-/* Diagonal stripe pattern for TechStack */
-.mobile-bg-techstack-stripes {
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    135deg,
-    rgba(99,102,241,0.04) 0px,
-    rgba(99,102,241,0.04) 1px,
-    transparent 1px,
-    transparent 32px
-  );
-  animation: grid-fade 8s ease-in-out infinite;
-}
-
-/* ─── Experience section mobile bg ───────────────── */
-.mobile-bg-experience {
-  position: absolute;
-  inset: 0;
-  background: #020202;
-  overflow: hidden;
-  pointer-events: none;
-}
-.mobile-bg-experience-orb1 {
-  position: absolute;
-  top: -5%;
-  left: 20%;
-  width: 80vw;
-  height: 80vw;
-  background: radial-gradient(ellipse at center, rgba(79,70,229,0.2) 0%, transparent 65%);
-  animation: orb-drift-a 13s ease-in-out infinite;
-  will-change: transform;
-}
-.mobile-bg-experience-orb2 {
-  position: absolute;
-  bottom: 10%;
-  right: -15%;
-  width: 70vw;
-  height: 70vw;
-  background: radial-gradient(ellipse at center, rgba(147,51,234,0.15) 0%, transparent 65%);
-  animation: orb-drift-b 17s ease-in-out infinite;
-  will-change: transform;
-}
-/* Dot matrix for Experience */
-.mobile-bg-experience-dots {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(99,102,241,0.18) 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
-  animation: grid-fade 10s ease-in-out infinite;
-  mask-image: radial-gradient(ellipse at 50% 60%, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 60%, black 20%, transparent 70%);
-}
-
-/* ─── Projects section mobile bg ─────────────────── */
-.mobile-bg-projects {
-  position: absolute;
-  inset: 0;
-  background: #020202;
-  overflow: hidden;
-  pointer-events: none;
-}
-.mobile-bg-projects-orb1 {
-  position: absolute;
-  top: 0%;
-  left: 50%;
-  width: 120vw;
-  height: 80vw;
-  background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.28) 0%, transparent 60%);
-  transform: translateX(-50%);
-  animation: orb-drift-c 15s ease-in-out infinite, orb-pulse-opacity 7s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-.mobile-bg-projects-orb2 {
-  position: absolute;
-  bottom: 15%;
-  left: -20%;
-  width: 80vw;
-  height: 80vw;
-  background: radial-gradient(ellipse at center, rgba(192,132,252,0.16) 0%, transparent 65%);
-  animation: orb-drift-a 19s ease-in-out infinite;
-  will-change: transform;
-}
-/* Crosshatch grid overlay */
-.mobile-bg-projects-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px);
-  background-size: 48px 48px;
-  animation: grid-fade 9s ease-in-out infinite;
-}
-
-/* ─── Contact section mobile bg ──────────────────── */
-.mobile-bg-contact {
-  position: absolute;
-  inset: 0;
-  background: #000;
-  overflow: hidden;
-  pointer-events: none;
-}
-.mobile-bg-contact-orb1 {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  width: 100vw;
-  height: 60vw;
-  background: radial-gradient(ellipse at center, rgba(14,165,233,0.18) 0%, transparent 65%);
-  transform: translateX(-50%);
-  animation: orb-drift-b 14s ease-in-out infinite;
-  will-change: transform;
-}
-.mobile-bg-contact-orb2 {
-  position: absolute;
-  bottom: 5%;
-  right: -10%;
-  width: 70vw;
-  height: 70vw;
-  background: radial-gradient(ellipse at center, rgba(99,102,241,0.2) 0%, transparent 65%);
-  animation: orb-drift-a 20s ease-in-out infinite, orb-pulse-opacity 10s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-/* Wave lines for Contact */
-@keyframes wave-shift {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.mobile-bg-contact-waves {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 200%;
-  height: 50%;
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 22px,
-    rgba(14,165,233,0.05) 22px,
-    rgba(14,165,233,0.05) 23px
-  );
-  animation: wave-shift 30s linear infinite;
-  will-change: transform;
+/* Top-of-screen veil behind the navbar */
+.nav-fade {
+  background: linear-gradient(to bottom, var(--ink) 0%, color-mix(in srgb, var(--ink) 85%, transparent) 45%, transparent 100%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent);
+  mask-image: linear-gradient(to bottom, black 55%, transparent);
 }
