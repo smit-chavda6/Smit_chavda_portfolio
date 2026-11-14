@@ -51,10 +51,10 @@ const channels = [
   },
 ];
 
-function Kicker({ index, children }: { index: string; children: React.ReactNode }) {
+function Kicker({ children }: { children: React.ReactNode }) {
   return (
     <p className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-muted">
-      <span style={{ color: "var(--c, var(--accent))" }}>[{index}]</span>
+      <span aria-hidden className="h-px w-8" style={{ background: "var(--c, var(--accent))" }} />
       {children}
     </p>
   );
@@ -76,7 +76,7 @@ export default function Scenes() {
           </h1>
         </Reveal>
         <Reveal delay={0.3}>
-          <p className="mx-auto mt-8 max-w-lg text-base leading-relaxed text-paper/70 md:text-lg">
+          <p className="legible mx-auto mt-8 max-w-lg text-base leading-relaxed text-paper/90 md:text-lg">
             I build the systems that turn raw model capability into shipped product — LLM gateways, AI features and the
             pipelines behind them.
           </p>
@@ -86,7 +86,7 @@ export default function Scenes() {
       {/* 02 — About */}
       <Scene id="about">
         <Reveal>
-          <Kicker index="02">About</Kicker>
+          <Kicker>About</Kicker>
         </Reveal>
         <Reveal delay={0.1}>
           <h2 className="display mt-6 text-[min(8.5cqw,4.25rem)]">
@@ -117,14 +117,12 @@ export default function Scenes() {
         </Reveal>
       </Scene>
 
-      {/* 03–06 — Projects, one scene each */}
+      {/* 03–08 — Projects, one scene each */}
       {projects.map((p, i) => {
         return (
           <Scene key={p.id} id={p.id}>
             <Reveal>
-              <Kicker index={String(i + 3).padStart(2, "0")}>
-                Project {String(i + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")} · {p.category}
-              </Kicker>
+              <Kicker>Project · {p.category}</Kicker>
             </Reveal>
             <Reveal delay={0.1}>
               {/* Sized to the text column so long names (CONTEXTOS, MJ FAMILY SALON) never overflow */}
@@ -173,10 +171,10 @@ export default function Scenes() {
         );
       })}
 
-      {/* 07 — Stack */}
+      {/* 09 — Stack */}
       <Scene id="stack">
         <Reveal>
-          <Kicker index="07">Stack</Kicker>
+          <Kicker>Stack</Kicker>
         </Reveal>
         <Reveal delay={0.1}>
           <h2 className="display mt-6 text-[min(11cqw,5rem)]">
@@ -216,10 +214,10 @@ export default function Scenes() {
         </div>
       </Scene>
 
-      {/* 08 — Journey */}
+      {/* 10 — Journey */}
       <Scene id="journey">
         <Reveal>
-          <Kicker index="08">Journey</Kicker>
+          <Kicker>Journey</Kicker>
         </Reveal>
         <Reveal delay={0.1}>
           <h2 className="display mt-6 text-[min(11cqw,5rem)]">
@@ -244,10 +242,10 @@ export default function Scenes() {
         </ol>
       </Scene>
 
-      {/* 09 — Contact */}
+      {/* 11 — Contact */}
       <Scene id="contact">
         <Reveal>
-          <Kicker index="09">Contact</Kicker>
+          <Kicker>Contact</Kicker>
         </Reveal>
         <Reveal delay={0.1}>
           <h2 className="display mt-8 text-[clamp(2.6rem,10vw,8.5rem)]">
@@ -257,7 +255,7 @@ export default function Scenes() {
           </h2>
         </Reveal>
         <Reveal delay={0.2}>
-          <p className="mx-auto mt-8 max-w-md leading-relaxed text-paper/70">
+          <p className="legible mx-auto mt-8 max-w-md leading-relaxed text-paper/90 md:text-lg">
             Open to AI engineering roles. Questions, ideas or a hello — my inbox is open.
           </p>
         </Reveal>

@@ -29,8 +29,10 @@ export const scenes: Scene[] = [
   { id: "about", label: "About", shape: "knot", side: "left", color: "#9a86ff", colorLight: "#5a43d1" },
   { id: "infermesh", label: "Project / InferMesh", shape: "mesh", side: "left", color: "#ffb21f", colorLight: "#c27c00" },
   { id: "contextos", label: "Project / ContextOS", shape: "layers", side: "right", color: "#5bd1ff", colorLight: "#0a86bd" },
-  { id: "salon", label: "Project / MJ Salon", shape: "lattice", side: "left", color: "#b9ff5b", colorLight: "#4b870d" },
-  { id: "homedecor", label: "Project / Home Decor", shape: "wave", side: "right", color: "#ff7ad9", colorLight: "#c0328f" },
+  { id: "cinesphere", label: "Project / CineSphere", shape: "atlas", side: "left", color: "#ff6b5b", colorLight: "#c4372a" },
+  { id: "salon", label: "Project / MJ Salon", shape: "lattice", side: "right", color: "#b9ff5b", colorLight: "#4b870d" },
+  { id: "homedecor", label: "Project / Home Decor", shape: "wave", side: "left", color: "#ff7ad9", colorLight: "#c0328f" },
+  { id: "umamaheshwar", label: "Project / Uma Maheshwar", shape: "ledger", side: "right", color: "#4ff0a8", colorLight: "#12875a" },
   { id: "stack", label: "Stack", shape: "helix", side: "left", color: "#9a86ff", colorLight: "#5a43d1" },
   { id: "journey", label: "Journey", shape: "galaxy", side: "right", color: "#ffb21f", colorLight: "#c27c00" },
   { id: "contact", label: "Contact", shape: "portal", side: "center", color: "#9a86ff", colorLight: "#5a43d1" },
@@ -52,9 +54,9 @@ export const projects: {
     title: "InferMesh",
     category: "LLM Gateway & Observability",
     description:
-      "Production-shaped gateway unifying OpenAI, Anthropic, Gemini and Azure AI Foundry behind one OpenAI-compatible API — with retry/backoff, cross-provider fallback and circuit breaking, two-tier exact + pgvector semantic caching, Redis rate limiting and a 15-page React 19 observability dashboard.",
+      "One API that sits in front of OpenAI, Anthropic, Gemini and Azure. If a provider fails or slows down, requests retry or switch to another one automatically. Repeated questions are answered from a cache, usage is rate-limited, and a dashboard shows what every request cost and how long it took.",
     highlights: ["248+ automated tests", "4 LLM providers", "15-page dashboard"],
-    tech: ["Python 3.13", "FastAPI", "PostgreSQL", "pgvector", "Redis", "React 19", "TypeScript", "Docker", "GitHub Actions"],
+    tech: ["Python", "FastAPI", "PostgreSQL", "Redis", "React"],
     links: [{ label: "GitHub", href: "https://github.com/smit-chavda6/InferMesh" }],
   },
   {
@@ -62,12 +64,25 @@ export const projects: {
     title: "ContextOS",
     category: "AI Browser Extension",
     description:
-      "Context-persistence extension that carries session state across ChatGPT, Claude, Gemini and DeepSeek — with client-side vector search using in-browser cosine similarity and a credentials engine for multiple LLM APIs, stored strictly on the client for privacy.",
+      "A browser extension that remembers your conversations across ChatGPT, Claude, Gemini and DeepSeek, so you can pick up in one tool where you left off in another. Your history and API keys are stored only in your own browser, with no outside database.",
     highlights: ["4 AI platforms bridged", "8+ LLM APIs", "No external database"],
-    tech: ["React", "Vite", "Tailwind CSS", "Framer Motion", "Chrome MV3", "Vector Search"],
+    tech: ["React", "Vite", "Tailwind CSS", "Chrome Extension"],
     links: [
       { label: "Live", href: "https://context-os-extension.vercel.app/" },
       { label: "GitHub", href: "https://github.com/smit-chavda6/ContextOS-extension" },
+    ],
+  },
+  {
+    id: "cinesphere",
+    title: "CineSphere",
+    category: "Movie Discovery & Recommendations",
+    description:
+      "A movie discovery site laid out like an old sea map, where each feature is an island you fly between. It recommends films from your own taste using an engine I wrote myself, and covers everything from silent-era classics to upcoming releases.",
+    highlights: ["13 recommendation tools", "~13k lines of TypeScript", "38 unit tests"],
+    tech: ["Next.js", "TypeScript", "Tailwind CSS", "TMDB API"],
+    links: [
+      { label: "Live", href: "https://cinesphere-sage-one.vercel.app/" },
+      { label: "GitHub", href: "https://github.com/smit-chavda6/CineSphere" },
     ],
   },
   {
@@ -75,20 +90,33 @@ export const projects: {
     title: "MJ Family Salon",
     category: "Salon Website + Booking CMS",
     description:
-      "Live salon website with online appointment booking and email notifications, plus an admin CMS for bookings, services, gallery, team, reviews and hours — drag-to-reorder content, auto-resized image uploads, secure login and SEO settings, deployed on a custom domain over HTTPS.",
+      "A live website for a local salon. Customers can book appointments online and the owner gets an email for each one. Behind it is an admin panel where the salon updates its services, photos, team, reviews and opening hours without touching code.",
     highlights: ["Live in production", "Online booking", "Full admin CMS"],
-    tech: ["PHP 8.1", "MySQL", "JavaScript", "Bootstrap 5", "GSAP", "cPanel"],
+    tech: ["PHP", "MySQL", "JavaScript", "Bootstrap"],
     links: [{ label: "Live", href: "https://mjthefamilysalon.shop/" }],
   },
   {
     id: "homedecor",
     title: "Home Decor",
-    category: "E-Commerce + AI",
+    category: "E-Commerce + AR & 3D",
     description:
-      "Full-stack furniture store with authentication, an admin dashboard and REST APIs, a Gemini-powered chatbot with intelligent product search and caching, and invoices and order workflows automated through n8n webhooks.",
-    highlights: ["25+ REST APIs", "85% fewer AI API calls", "n8n automation"],
-    tech: ["Node.js", "Express", "MongoDB", "Gemini API", "n8n"],
-    links: [{ label: "GitHub", href: "https://github.com/smit-chavda6/HOME-DECOUR-FURNITURE" }],
+      "An online furniture store where you can view products in 3D and place them in your own room with AR. An AI assistant helps you shop and can suggest pieces from a photo of your room. It has login, a cart, online payments and an admin dashboard.",
+    highlights: ["AR view in your room", "Gemini room advisor", "Razorpay payments"],
+    tech: ["Next.js", "TypeScript", "MongoDB", "Three.js", "Gemini API"],
+    links: [
+      { label: "Live", href: "https://homedecorfurnitureshop.vercel.app/" },
+      { label: "GitHub", href: "https://github.com/smit-chavda6/HOME-DECOUR-FURNITURE" },
+    ],
+  },
+  {
+    id: "umamaheshwar",
+    title: "Uma Maheshwar",
+    category: "Android App · Digital Khata",
+    description:
+      "An Android app that replaces the paper khata for a stitching job-work shop. Bills are made in one tap and sent as PDFs straight to the customer's WhatsApp, balances update on their own, and the owner and staff share one khata across phones — even when offline. It works in Gujarati and English.",
+    highlights: ["In production · v2.0.1", "Offline-first sync", "Gujarati & English"],
+    tech: ["React Native", "Expo", "TypeScript", "SQLite", "Firebase"],
+    links: [{ label: "Live", href: "https://uma-maheshwar.vercel.app/" }],
   },
 ];
 

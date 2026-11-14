@@ -6,8 +6,10 @@ export type ShapeName =
   | "knot"
   | "mesh"
   | "layers"
+  | "atlas"
   | "lattice"
   | "wave"
+  | "ledger"
   | "helix"
   | "galaxy"
   | "portal";
@@ -121,6 +123,41 @@ const generators: Record<ShapeName, (n: number) => Float32Array> = {
     return rotate(out, -0.45, 0.75);
   },
 
+  // Chart globe — graticule lines with scattered "islands" on the surface
+  atlas(n) {
+    const out = new Float32Array(n * 3);
+    const R = 1.95;
+    const islands = Array.from({ length: 9 }, () => {
+      const th = Math.random() * TAU, ph = Math.acos(rnd(-0.85, 0.85));
+      return [Math.sin(ph) * Math.cos(th), Math.cos(ph), Math.sin(ph) * Math.sin(th)];
+    });
+    for (let i = 0; i < n; i++) {
+      const f = i / n;
+      let p: [number, number, number];
+      if (f < 0.55) {
+        // meridians and parallels
+        const t = Math.random() * TAU;
+        if (i % 2) {
+          const lon = (Math.floor(Math.random() * 12) * TAU) / 12;
+          p = [Math.sin(t) * Math.cos(lon) * R, Math.cos(t) * R, Math.sin(t) * Math.sin(lon) * R];
+        } else {
+          const lat = (Math.floor(Math.random() * 7) - 3) * 0.38;
+          const r = Math.cos(lat) * R;
+          p = [Math.cos(t) * r, Math.sin(lat) * R, Math.sin(t) * r];
+        }
+      } else {
+        // island clusters hugging the surface
+        const c = islands[i % islands.length];
+        const [jx, jy, jz] = inBall(0.32);
+        const x = c[0] + jx, y = c[1] + jy, z = c[2] + jz;
+        const k = (R * rnd(0.98, 1.06)) / Math.hypot(x, y, z);
+        p = [x * k, y * k, z * k];
+      }
+      out.set(p, i * 3);
+    }
+    return rotate(out, 0.35, 0.2);
+  },
+
   // Structured cube lattice — full-stack system
   lattice(n) {
     const out = new Float32Array(n * 3);
@@ -146,6 +183,42 @@ const generators: Record<ShapeName, (n: number) => Float32Array> = {
       out.set([x, y, z], i * 3);
     }
     return rotate(out, 0.55, 0.3);
+  },
+
+  // Phone-shaped ledger — a rounded screen outline with rows of entries
+  ledger(n) {
+    const out = new Float32Array(n * 3);
+    const W = 1.15, H = 2.2, rad = 0.3, rows = 11;
+    for (let i = 0; i < n; i++) {
+      const f = i / n;
+      let x: number, y: number;
+      if (f < 0.35) {
+        // rounded-rectangle outline
+        const t = Math.random() * 4;
+        const e = Math.floor(t), u = t - e;
+        if (e === 0 || e === 2) {
+          x = (u * 2 - 1) * (W - rad);
+          y = e === 0 ? H : -H;
+        } else {
+          x = e === 1 ? W : -W;
+          y = (u * 2 - 1) * (H - rad);
+        }
+        if (Math.abs(x) > W - rad && Math.abs(y) > H - rad) {
+          const cx = Math.sign(x) * (W - rad), cy = Math.sign(y) * (H - rad);
+          const a = Math.atan2(y - cy, x - cx);
+          x = cx + Math.cos(a) * rad;
+          y = cy + Math.sin(a) * rad;
+        }
+      } else {
+        // ledger rows: a label on the left, an amount on the right
+        const row = Math.floor(Math.random() * rows);
+        y = H - 0.45 - row * ((2 * H - 0.8) / (rows - 1));
+        x = Math.random() < 0.65 ? rnd(-W + 0.2, 0.15) : rnd(0.45, W - 0.2);
+        y += rnd(-0.03, 0.03);
+      }
+      out.set([x, y, rnd(-0.06, 0.06)], i * 3);
+    }
+    return rotate(out, 0.25, -0.55);
   },
 
   // Double helix with rungs — the stack, layer by layer

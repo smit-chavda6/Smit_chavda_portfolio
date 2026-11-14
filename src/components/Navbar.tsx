@@ -13,7 +13,6 @@ const navLinks = [
   { name: "Contact", href: "#contact", scenes: ["contact"] },
 ];
 
-const pad = (n: number) => String(n).padStart(2, "0");
 const spring = { type: "spring", stiffness: 420, damping: 36 } as const;
 
 // 3×3 "neuron" matrix — a diagonal pulse sweeps through it in the scene colour
@@ -236,7 +235,9 @@ export default function Navbar({
                 className="flex items-center gap-3 py-2.5 pl-4 pr-3"
               >
                 <Orb color={color} />
-                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">{pad(active + 1)}</span>
+                {scene.label.startsWith("Project / ") && (
+                  <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Work</span>
+                )}
                 <span key={scene.id} className="hud-fade whitespace-nowrap text-[13px] font-medium text-paper">
                   {scene.label.replace("Project / ", "")}
                 </span>
@@ -328,7 +329,6 @@ export default function Navbar({
                     <span className="display text-5xl sm:text-6xl" style={{ color: i === activeNav ? color : undefined }}>
                       {l.name}
                     </span>
-                    <span className="font-mono text-xs text-muted">{pad(i + 1)}</span>
                   </a>
                 </motion.li>
               ))}

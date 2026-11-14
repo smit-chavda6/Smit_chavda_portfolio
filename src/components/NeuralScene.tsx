@@ -155,6 +155,7 @@ export default function NeuralScene({ active, theme, color }: { active: number; 
       blending: THREE.AdditiveBlending,
     });
 
+    let baseOpacity = 1;
     applyThemeRef.current = (t: Theme) => {
       const l = look[t];
       uniforms.uBase.value.set(l.base);
@@ -163,7 +164,8 @@ export default function NeuralScene({ active, theme, color }: { active: number; 
       uniforms.uCore.value = l.core;
       uniforms.uPaperFog.value = l.paperFog;
       uniforms.uSizeMul.value = l.sizeMul;
-      uniforms.uOpacity.value = isMobile ? l.mobileOpacity : l.opacity;
+      baseOpacity = isMobile ? l.mobileOpacity : l.opacity;
+      uniforms.uOpacity.value = baseOpacity;
       material.blending = l.blending;
       material.needsUpdate = true;
     };
@@ -263,6 +265,10 @@ export default function NeuralScene({ active, theme, color }: { active: number; 
       // Accent comes from Stage (current scene colour for the active theme)
       accent.set(colorRef.current);
       uniforms.uAccent.value.lerp(accent, 1 - Math.exp(-dt * 2));
+
+      // Light mode: dark text sits right over the centred shape (Intro, Contact), so fade it back there
+      const dim = themeRef.current === "light" && sceneCfg.side === "center" ? 0.4 : 1;
+      uniforms.uOpacity.value += (baseOpacity * dim - uniforms.uOpacity.value) * (1 - Math.exp(-dt * 3));
 
       // Slide the cloud away from the text column on wide screens
       const halfW = Math.tan(THREE.MathUtils.degToRad(25)) * camera.position.z * camera.aspect;

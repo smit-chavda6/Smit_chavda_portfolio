@@ -237,6 +237,42 @@ html.has-cursor * {
   }
 }
 
+/* Body copy that sits directly over the centred particle shape (Intro, Contact) */
+.legible {
+  text-shadow:
+    0 0 2px var(--ink),
+    0 0 6px var(--ink),
+    0 1px 16px var(--ink),
+    0 2px 32px color-mix(in srgb, var(--ink) 90%, transparent);
+}
+
+/* Dark mode on phones/tablets: the particle cloud sits directly behind the text
+   column, so dim it with a scrim and lift the low-contrast text tones. */
+@media (max-width: 1023px) {
+  :root:not([data-theme="light"]) {
+    --muted: #b3afa8;
+  }
+  :root:not([data-theme="light"]) body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1; /* above the canvas (z-0) and glow, below content (z-10) */
+    pointer-events: none;
+    background: color-mix(in srgb, var(--ink) 30%, transparent);
+  }
+  :root:not([data-theme="light"]) [data-scene] > div {
+    text-shadow:
+      0 0 2px var(--ink),
+      0 1px 12px var(--ink),
+      0 2px 28px color-mix(in srgb, var(--ink) 90%, transparent);
+  }
+  :root:not([data-theme="light"]) .text-paper\/60,
+  :root:not([data-theme="light"]) .text-paper\/70,
+  :root:not([data-theme="light"]) .text-paper\/80 {
+    color: color-mix(in srgb, var(--paper) 92%, transparent);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hud-fade { animation: none; }
