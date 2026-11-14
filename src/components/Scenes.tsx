@@ -66,7 +66,7 @@ export default function Scenes() {
       {/* 01 — Intro */}
       <Scene id="intro">
         <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted">AI Engineer · Generative AI · LLM Systems</p>
+          <p className="legible font-mono text-[11px] font-medium uppercase tracking-[0.3em] text-paper/80 md:text-xs">AI Engineer · Generative AI · LLM Systems</p>
         </Reveal>
         <Reveal delay={0.15}>
           <h1 className="display mt-8 text-[clamp(2.6rem,11vw,9.5rem)]">
