@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JetBrains_Mono, Manrope, Unbounded } from "next/font/google";
 import "./globals.css";
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full font-sans">
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
